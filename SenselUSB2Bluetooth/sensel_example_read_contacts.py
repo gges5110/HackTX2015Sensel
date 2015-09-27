@@ -86,6 +86,7 @@ def openSensorReadContacts(sensel_device, bt):
 
         if len(contacts) > 0:
             print("****", end="\r\n");
+            bt.send("****\n")
 
     sensel_device.stopScanning();
     sensel_device.closeConnection();
@@ -93,13 +94,12 @@ def openSensorReadContacts(sensel_device, bt):
 
 if __name__ == "__main__":
     try:
-        bt = ConnectBluetooth()
-
         sensel_device = sensel.SenselDevice()
         if not sensel_device.openConnection():
             print("Unable to open Sensel sensor!", end="\r\n")
             exit()
 
+        bt = ConnectBluetooth()
         keyboardReadThreadStart(keypress_handler)
 
         openSensorReadContacts(sensel_device, bt)

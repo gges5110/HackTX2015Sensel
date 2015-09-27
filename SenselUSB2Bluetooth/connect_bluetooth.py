@@ -6,7 +6,9 @@ class ConnectBluetooth:
 
 
 	def __init__(self):
+		print "Connecting to bluetooth..."
 		target_name = "Onetouch Idol 3"
+		#target_name = "Galaxy Mega"
 		target_address = None
 
 		nearby_devices = bluetooth.discover_devices()
