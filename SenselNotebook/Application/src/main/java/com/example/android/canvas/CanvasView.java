@@ -7,13 +7,17 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
+import android.os.Environment;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import com.example.android.bluetoothchat.SenselInput;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -42,6 +46,7 @@ public class CanvasView extends View {
     private ArrayList<Integer> pointcolor = new ArrayList<Integer>();
     private ArrayList<Integer> marker = new ArrayList<Integer>();
     private ArrayList<Point> points = new ArrayList<Point>();
+    private Context context;
 
     public int width;
     public int height;
@@ -52,7 +57,9 @@ public class CanvasView extends View {
 
     public CanvasView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.context = context;
         setupDrawing();
+        setDrawingCacheEnabled(true);
         // TODO Auto-generated constructor stub
     }
 
@@ -164,6 +171,23 @@ public class CanvasView extends View {
         return true;
     }
 
+    public void save()  {
+        try {
+            File save = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "arun.jpg");
+            FileOutputStream fos = new FileOutputStream(save);
+            setBackgroundColor(Color.WHITE);
+            getDrawingCache().compress(
+                    Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+            fos.close();
+            Log.v(TAG, "file saved at " + save.getPath());
+            Toast.makeText(context,
+                    "Succesfully saved", Toast.LENGTH_LONG)
+                    .show();
+        } catch (Exception e) {
+            Log.e("Error--------->", e.toString());
+        }
+    }
 
     private void touch_start(float x, float y) {
         drawPoint = true;

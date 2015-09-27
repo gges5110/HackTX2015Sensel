@@ -31,6 +31,18 @@
         android:id="@+id/clear_button"
         android:layout_gravity="center_horizontal"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="95dp"
+        android:layout_marginStart="95dp" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:id="@+id/save_button"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@+id/clear_button"
+        android:layout_toEndOf="@+id/clear_button" />
 
 </RelativeLayout>

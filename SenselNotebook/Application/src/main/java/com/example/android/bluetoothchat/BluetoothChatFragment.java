@@ -49,7 +49,7 @@ import java.util.TimerTask;
 public class BluetoothChatFragment extends Fragment {
 
     private static final String TAG = "BluetoothChatFragment";
-    private Button clear_button = null;
+    private Button clear_button, save_button;
 
     // Intent request codes
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
@@ -163,6 +163,16 @@ public class BluetoothChatFragment extends Fragment {
                     canvasView.clearCanvas();
                 }
             });
+
+            save_button = (Button) getView().findViewById(R.id.save_button);
+            save_button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    canvasView.save();
+                }
+            });
+
+
         }
     }
 
@@ -238,9 +248,11 @@ public class BluetoothChatFragment extends Fragment {
     }
 
     private void setEnd() {
+
         if(prev_input != null) {
             prev_input.setEvent(SenselInput.Event.END);
             canvasView.onSenselEvent(prev_input);
+            Log.v(TAG, "set end");
         }
     }
 
@@ -295,7 +307,13 @@ public class BluetoothChatFragment extends Fragment {
                                 timer.schedule(new TimerTask() {
                                     @Override
                                     public void run() {
-                                        setEnd();
+
+                                        getActivity().runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        setEnd();
+                                                    }
+                                        });
                                     }
                                 }, 100);
                             }
