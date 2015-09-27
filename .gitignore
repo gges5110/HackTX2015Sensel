@@ -1,2 +1,11 @@
 *.pyc
 .idea/
+
+.DS_Store
+
+*.iml
+*.apk
+
+bin/
+build/
+.gradle/
