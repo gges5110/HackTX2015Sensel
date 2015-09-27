@@ -129,10 +129,9 @@ public class CanvasView extends View {
     public boolean onSenselEvent(SenselInput event) {
         if(event.getForce() < 500 && !SenselInput.Event.END.equals(event.getEvent()) )
             return false;
-        if(event.getContactID() > 0)
-            return false;
 
         Log.v(TAG, "event x = " + event.getX() + ", event y = " + event.getY());
+
         float x = event.getY()*width/120;
         float y = height - event.getX() * height / 230;
         Log.v(TAG, "x = " + x + ", y = " + y);
