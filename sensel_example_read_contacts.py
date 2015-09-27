@@ -43,7 +43,7 @@ def keypress_handler(ch):
 def openSensorReadContacts():
     sensel_device = sensel.SenselDevice()
 
-    if not sensel_device.openConnection():
+    if not sensel_device.openConnection('COM5'):
         print("Unable to open Sensel sensor!", end="\r\n")
         exit()
 
@@ -51,7 +51,7 @@ def openSensorReadContacts():
 
     #Enable contact sending
     sensel_device.setFrameContentControl(sensel.SENSEL_FRAME_CONTACTS_FLAG)
-  
+
     #Enable scanning
     sensel_device.startScanning()
 
