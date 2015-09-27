@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -21,32 +22,52 @@ import java.util.HashMap;
  */
 public class CanvasView extends View {
 
+    // drawing path
+    private Path drawPath;
+    // drawing point
+    private boolean drawPoint;
+    // drawing and canvas paint
+    public Paint drawPaint;
+    public Paint tempPaint;
+    private Paint canvasPaint;
+    // initial color
+    private int paintColor = Color.BLACK;
+    // canvas
+    private Canvas drawCanvas;
+    // canvas bitmap
+    private Bitmap canvasBitmap;
+
+    private ArrayList<Path> paths = new ArrayList<Path>();
+    private ArrayList<Integer> pathscolor = new ArrayList<Integer>();
+    private ArrayList<Integer> pointcolor = new ArrayList<Integer>();
+    private ArrayList<Integer> marker = new ArrayList<Integer>();
+    private ArrayList<Point> points = new ArrayList<Point>();
+
     public int width;
     public int height;
-    private Bitmap mBitmap;
-    private Canvas mCanvas;
-    private Path mPath;
-    Context context;
-    private Paint mPaint;
-    private float mX, mY;
-    private static final float TOLERANCE = 5;
-    private HashMap<Path, Float> strokeWidthMemory;
     private static final String TAG = "CanvasView";
 
+    private float mX, mY;
+    private final float TOUCH_TOLERANCE = 1;
 
-    public CanvasView(Context c, AttributeSet attrs) {
-        super(c, attrs);
-        context = c;
-        // we set a new Path
-        mPath = new Path();
+    public CanvasView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        setupDrawing();
+        // TODO Auto-generated constructor stub
+    }
 
-        // and we set a new Paint with the desired attributes
-        mPaint = new Paint();
-        mPaint.setAntiAlias(true);
-        mPaint.setColor(Color.BLACK);
-        mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setStrokeJoin(Paint.Join.ROUND);
-        mPaint.setStrokeWidth(4f);
+    private void setupDrawing() {
+        // get drawing area setup for interaction
+
+        drawPath = new Path();
+        drawPaint = new Paint();
+        // drawPaint.setColor(paintColor);
+        drawPaint.setAntiAlias(true);
+        drawPaint.setStrokeWidth(20);
+        drawPaint.setStyle(Paint.Style.STROKE);
+        drawPaint.setStrokeJoin(Paint.Join.ROUND);
+        drawPaint.setStrokeCap(Paint.Cap.ROUND);
+        canvasPaint = new Paint(Paint.DITHER_FLAG);
         color_list = new ArrayList<>();
         color_list.add(Color.BLACK);
         color_list.add(Color.RED);
@@ -55,70 +76,56 @@ public class CanvasView extends View {
         color_index = 0;
     }
 
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        super.onLayout(changed, l, t, r, b);
-        //here you have the size of the view and you can do stuff
-        Log.v(TAG, "left = " + l + ", t = " + t + ", r = " + r + ", b = " + b);
-
-    }
-
-    // override onSizeChanged
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-
-        // your Canvas will draw onto the defined Bitmap
-        mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-        Log.v(TAG, "width = " + w + ", height = " + h);
-        width = w;
-        height = h;
-        mCanvas = new Canvas(mBitmap);
-    }
-
-    // override onDraw
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        // draw the mPath with the mPaint on the canvas when onDraw
-        canvas.drawPath(mPath, mPaint);
-    }
-
-    // when ACTION_DOWN start touch according to the x,y values
-    private void startTouch(float x, float y) {
-        mPath.moveTo(x, y);
-        mX = x;
-        mY = y;
-    }
-
-    // when ACTION_MOVE move touch according to the x,y values
-    private void moveTouch(float x, float y) {
-        float dx = Math.abs(x - mX);
-        float dy = Math.abs(y - mY);
-        if (dx >= TOLERANCE || dy >= TOLERANCE) {
-            mPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
-            mX = x;
-            mY = y;
-        }
-    }
-
     private ArrayList<Integer> color_list;
     private int color_index = 0;
 
     public void changeColor() {
+        Log.v(TAG, "change color");
         color_index++;
-        mPaint.setColor(color_list.get(color_index % color_list.size()));
+        setUpPaint(color_list.get(color_index % color_list.size()));
     }
 
-    public void clearCanvas() {
-        mPath.reset();
-        invalidate();
+    private Paint setUpPaint(int color) {
+        tempPaint = new Paint();
+        tempPaint.setColor(color);
+        tempPaint.setAntiAlias(true);
+        tempPaint.setStrokeWidth(20);
+
+        tempPaint.setStyle(Paint.Style.STROKE);
+        tempPaint.setStrokeJoin(Paint.Join.ROUND);
+        tempPaint.setStrokeCap(Paint.Cap.ROUND);
+        return tempPaint;
     }
 
-    // when ACTION_UP stop touch
-    private void upTouch() {
-        mPath.lineTo(mX, mY);
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        // TODO Auto-generated method stub
+        super.onSizeChanged(w, h, oldw, oldh);
+        width = w;
+        height = h;
+        canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        drawCanvas = new Canvas(canvasBitmap);
     }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        // TODO Auto-generated method stub
+        if (marker.size() > 0) {
+
+            for (int i = 0; i < paths.size(); i++) {
+
+                canvas.drawPath(paths.get(i), setUpPaint(pathscolor.get(i)));
+            }
+
+            for (int i = 0; i < points.size(); i++) {
+                canvas.drawPoint(points.get(i).x, points.get(i).y,
+                        setUpPaint(pointcolor.get(i)));
+            }
+        }
+        canvas.drawPath(drawPath, drawPaint);
+
+    }
+
 
     public boolean onSenselEvent(SenselInput event) {
         if(event.getForce() < 500 && !SenselInput.Event.END.equals(event.getEvent()) )
@@ -128,22 +135,114 @@ public class CanvasView extends View {
 
 
         float x = event.getY()*width/120;
-        float y = height - event.getX()*height/230;
+        float y = height - event.getX() * height / 230;
         Log.v(TAG, "x = " + x + ", y = " + y);
-        mPaint.setStrokeWidth(event.getForce()/1000) ;
+//        mPaint.setStrokeWidth(event.getForce()/1000) ;
 
         if(SenselInput.Event.START.equals(event.getEvent())) {
-            startTouch(x, y);
+            touch_start(x, y);
             invalidate();
         }
         else if (SenselInput.Event.MOVE.equals(event.getEvent())) {
-            moveTouch(x, y);
+            touch_move(x, y);
             invalidate();
         }
         else if (SenselInput.Event.END.equals(event.getEvent())) {
-            upTouch();
+            touch_up();
             invalidate();
         }
+        else {
+            return false;
+        }
+        invalidate();
         return true;
     }
+
+
+    private void touch_start(float x, float y) {
+        drawPoint = true;
+        drawPath.reset();
+        drawPath.moveTo(x, y);
+        drawCanvas.drawPath(drawPath, drawPaint);
+        mX = x;
+        mY = y;
+
+    }
+
+    private void touch_move(float x, float y) {
+        float dx = Math.abs(x - mX);
+        float dy = Math.abs(y - mY);
+        if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
+            drawPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
+            drawPoint = false;
+            drawCanvas.drawPath(drawPath,drawPaint);
+            mX = x;
+            mY = y;
+        }
+    }
+
+
+    private void touch_up() {
+        if (drawPoint == true) {
+            drawCanvas.drawPoint(mX, mY, drawPaint);
+            Point p = new Point();
+            p.set((int) mX, (int) mY);
+            points.add(p);
+            pointcolor.add(drawPaint.getColor());
+            marker.add(0);
+
+        } else {
+            drawPath.lineTo(mX, mY);
+            drawCanvas.drawPath(drawPath, drawPaint);
+            paths.add(drawPath);
+            drawPath = new Path();
+            drawPath.reset();
+            pathscolor.add(drawPaint.getColor());
+            marker.add(1);
+
+        }
+    }
+
+    public void clearCanvas() {
+        if (marker.size() > 0) {
+            paths.clear();
+            points.clear();
+            pathscolor.clear();
+            pointcolor.clear();
+            invalidate();
+        }
+
+    }
+
+    public void undo() {
+        if (marker.size() > 0) {
+            if (marker.get(marker.size() - 1) == 1) {
+                if (paths.size() > 0) {
+                    paths.remove(paths.size() - 1);
+                    pathscolor.remove(pathscolor.size() - 1);
+                    marker.remove(marker.size() - 1);
+                    invalidate();
+                }
+            } else {
+                if (points.size() > 0) {
+                    points.remove(points.size() - 1);
+                    pointcolor.remove(pointcolor.size() - 1);
+                    marker.remove(marker.size() - 1);
+                    invalidate();
+
+                }
+
+            }
+        }
+    }
+
+
+
+
+
+
+    ////////////////////////////////////////////
+
+
+
 }
