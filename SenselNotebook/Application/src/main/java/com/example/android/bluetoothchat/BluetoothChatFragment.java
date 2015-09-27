@@ -32,12 +32,9 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.android.canvas.CanvasView;
@@ -220,8 +217,15 @@ public class BluetoothChatFragment extends Fragment {
 //    };
 
     public void gestureDetected(Boolean isLongPress, Gesture.Direction dir, Gesture.NumFingers numFingers){
-        Log.v(TAG, isLongPress +" " + dir +" "+ numFingers);
-        canvasView.changeColor();
+        Log.v(TAG, isLongPress + " " + dir + " " + numFingers);
+
+        if(Gesture.Direction.UP.equals(dir))
+            canvasView.changeColorUp();
+        else if(Gesture.Direction.DOWN.equals(dir))
+            canvasView.changeColorDown();
+
+        if(Gesture.Direction.RIGHT.equals(dir) && Gesture.Direction.LEFT.equals(dir))
+            canvasView.undo();
     }
 
 

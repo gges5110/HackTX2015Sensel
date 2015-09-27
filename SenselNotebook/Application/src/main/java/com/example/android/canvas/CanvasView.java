@@ -79,10 +79,16 @@ public class CanvasView extends View {
     private ArrayList<Integer> color_list;
     private int color_index = 0;
 
-    public void changeColor() {
+    public void changeColorUp() {
         Log.v(TAG, "change color");
         color_index++;
-        setUpPaint(color_list.get(color_index % color_list.size()));
+        drawPaint.setColor(color_list.get(color_index % color_list.size()));
+    }
+
+    public void changeColorDown() {
+        Log.v(TAG, "change color");
+        color_index--;
+        drawPaint.setColor(color_list.get(color_index % color_list.size()));
     }
 
     private Paint setUpPaint(int color) {
@@ -135,7 +141,7 @@ public class CanvasView extends View {
         float x = event.getY()*width/120;
         float y = height - event.getX() * height / 230;
         Log.v(TAG, "x = " + x + ", y = " + y);
-//        mPaint.setStrokeWidth(event.getForce()/1000) ;
+        drawPaint.setStrokeWidth(event.getForce()/1000);
 
         if(SenselInput.Event.START.equals(event.getEvent())) {
             touch_start(x, y);
@@ -158,6 +164,7 @@ public class CanvasView extends View {
 
     private void touch_start(float x, float y) {
         drawPoint = true;
+        drawPath = new Path();
         drawPath.reset();
         drawPath.moveTo(x, y);
         drawCanvas.drawPath(drawPath, drawPaint);
@@ -193,8 +200,6 @@ public class CanvasView extends View {
             drawPath.lineTo(mX, mY);
             drawCanvas.drawPath(drawPath, drawPaint);
             paths.add(drawPath);
-            drawPath = new Path();
-            drawPath.reset();
             pathscolor.add(drawPaint.getColor());
             marker.add(1);
         }
