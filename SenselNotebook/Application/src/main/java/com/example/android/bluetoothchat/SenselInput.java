@@ -119,6 +119,10 @@ public class SenselInput {
 		return event;
 	}
 
+	public void setEvent(Event e){
+		event = e;
+	}
+
 	public float getX() {
 		return coordinateX;
 	}
@@ -141,5 +145,9 @@ public class SenselInput {
 
 	public float getOrientation() {
 		return orientation;
+	}
+
+	public double getDistance(SenselInput other){
+		return Math.sqrt(Math.pow((coordinateX - other.coordinateX),2) + Math.pow((coordinateY - other.coordinateY), 2));
 	}
 }

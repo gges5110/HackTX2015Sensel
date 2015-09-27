@@ -70,6 +70,8 @@ public class BluetoothChatFragment extends Fragment {
      */
     private BluetoothChatService mChatService = null;
 
+    private SenselInput prev_input = null;
+
     private CanvasView canvasView = null;
 
     private Gesture gesture = null;
@@ -257,8 +259,16 @@ public class BluetoothChatFragment extends Fragment {
                         //detect
                        gesture.add(senselMsg);
 //                       Log.v(TAG, senselMsg);
-                        if(!"****".equals(senselMsg))
-                            canvasView.onSenselEvent(new SenselInput(senselMsg));
+                        if(!"****".equals(senselMsg)) {
+                            SenselInput current_input = new SenselInput(senselMsg);
+                            if(prev_input != null && prev_input.getDistance(current_input) > 20){
+                                prev_input.setEvent(SenselInput.Event.END);
+                                canvasView.onSenselEvent(prev_input);
+                            }
+
+                            canvasView.onSenselEvent(current_input);
+                            prev_input = current_input;
+                        }
                     }
 
                     break;
