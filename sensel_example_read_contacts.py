@@ -30,6 +30,8 @@ from __future__ import print_function
 from keyboard_reader import *
 import sensel
 
+from connect_bluetooth import ConnectBluetooth
+
 exit_requested = False;
 
 def keypress_handler(ch):
@@ -40,14 +42,8 @@ def keypress_handler(ch):
         exit_requested = True;
 
 
-def openSensorReadContacts():
-    sensel_device = sensel.SenselDevice()
-
-    if not sensel_device.openConnection():
-        print("Unable to open Sensel sensor!", end="\r\n")
-        exit()
-
-    keyboardReadThreadStart(keypress_handler)
+def openSensorReadContacts(sensel_device, bt):
+#def openSensorReadContacts():
 
     #Enable contact sending
     sensel_device.setFrameContentControl(sensel.SENSEL_FRAME_CONTACTS_FLAG)
@@ -78,10 +74,15 @@ def openSensorReadContacts():
             else:
                 event = "error";
     
-            print("Contact ID %d, event=%s, mm coord: (%f, %f), force=%d, " 
-                  "major=%f, minor=%f, orientation=%f" % 
+            print("Contact ID %d, event=%s, mm coord: (%f, %f), force=%d, "
+                  "major=%f, minor=%f, orientation=%f" %
                   (c.id, event, c.x_pos_mm, c.y_pos_mm, c.total_force, 
                    c.major_axis_mm, c.minor_axis_mm, c.orientation_degrees), end="\r\n")
+
+            bt.send("Contact ID %d, event=%s, mm coord: (%f, %f), force=%d, "
+                  "major=%f, minor=%f, orientation=%f\n" %
+                  (c.id, event, c.x_pos_mm, c.y_pos_mm, c.total_force,
+                   c.major_axis_mm, c.minor_axis_mm, c.orientation_degrees))
 
         if len(contacts) > 0:
             print("****", end="\r\n");
@@ -91,5 +92,21 @@ def openSensorReadContacts():
     keyboardReadThreadStop()
 
 if __name__ == "__main__":
-    openSensorReadContacts()
-    
+    try:
+        bt = ConnectBluetooth()
+
+        sensel_device = sensel.SenselDevice()
+        if not sensel_device.openConnection():
+            print("Unable to open Sensel sensor!", end="\r\n")
+            exit()
+
+        keyboardReadThreadStart(keypress_handler)
+
+        openSensorReadContacts(sensel_device, bt)
+        #openSensorReadContacts()
+    finally:
+        sensel_device.stopScanning()
+        sensel_device.closeConnection()
+        keyboardReadThreadStop()
+
+
