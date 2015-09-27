@@ -1,8 +1,8 @@
 package com.example.android.bluetoothchat;
 
-import android.os.Handler;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -20,11 +20,12 @@ public class Gesture {
     private BluetoothChatFragment handler;
 
     private Direction dir;
-    private Fingers fingers;
+    private NumFingers numFingers;
+    private boolean longPress;
 //    private String messages;
 
     public enum Direction {UP, DOWN, LEFT, RIGHT, INVALID};
-    public enum Fingers {TWO, THREE, FOUR, FIVE, INVALID};
+    public enum NumFingers {ONE, TWO, THREE, FOUR, FIVE, INVALID};
 
     public Gesture(BluetoothChatFragment h){
 //    public Gesture(Handler handler) {
@@ -34,6 +35,8 @@ public class Gesture {
         queue.addLast(new SenselInputGroup());
 //        messages = "";
         dir = Direction.INVALID;
+        numFingers = NumFingers.INVALID;
+        longPress = false;
     }
 
     public void add(String s){
@@ -68,20 +71,23 @@ public class Gesture {
         }
 
         switch(max_occurrence_key){
+            case 1:
+                numFingers = NumFingers.ONE;
+                break;
             case 2:
-                fingers = Fingers.TWO;
+                numFingers = NumFingers.TWO;
                 break;
             case 3:
-                fingers = Fingers.THREE;
+                numFingers = NumFingers.THREE;
                 break;
             case 4:
-                fingers = Fingers.FOUR;
+                numFingers = NumFingers.FOUR;
                 break;
             case 5:
-                fingers = Fingers.FIVE;
+                numFingers = NumFingers.FIVE;
                 break;
             default:
-                fingers = Fingers.INVALID;
+                numFingers = NumFingers.INVALID;
         }
         return max_occurrence_key;
     }
@@ -93,32 +99,43 @@ public class Gesture {
         } while (first.size() != numFingers);
 
         do {
+            //TODO could crash when no more element is left
             last = queue.removeLast();
         } while (last.size() != numFingers);
 
         // hopefully the contactIDs from "first" and "last" are the same...
-        double sumXDiff= 0, sumYDiff=0;
-        for (int contactID : first.getContactIDs()) {
+        double sumXDiff = 0, sumYDiff = 0;
+        ArrayList<Integer> intersect = new ArrayList<>();
+        intersect.addAll(first.getContactIDs());
+        intersect.retainAll(last.getContactIDs());
+        for (int contactID : intersect) {
             double xDiff = last.getSenselInputByContactID(contactID).getX() - first.getSenselInputByContactID(contactID).getX();
             double yDiff = last.getSenselInputByContactID(contactID).getY() - first.getSenselInputByContactID(contactID).getY();
             sumXDiff += xDiff;
             sumYDiff += yDiff;
         }
 
-        double arctan = Math.atan(sumYDiff/sumXDiff);
-        if(arctan >= Math.PI/2){ // top or bottom
-            if(sumYDiff >=0)
-                dir = Direction.UP;
-            else
-                dir = Direction.DOWN;
+        if (sumXDiff == 0){
+            dir = Direction.INVALID;
+            return;
         }
-        else if (arctan >= -Math.PI/2 && arctan < Math.PI/2){
+        double arctan = Math.atan(sumYDiff/sumXDiff);
+        Log.v(TAG, "xDiff " + sumXDiff);
+        Log.v(TAG, "yDiff" + sumYDiff);
+        Log.v(TAG, "arctan " + arctan);
+        if(arctan >= Math.PI/4){ // top or bottom
+            if (sumYDiff >= 0 && sumXDiff >= 0)
+                dir = Direction.DOWN;
+            else
+                dir = Direction.UP;
+        }
+        else if (arctan >= -Math.PI/4 && arctan < Math.PI/4){
             if(sumXDiff > 0)
                 dir = Direction.RIGHT;
             else
                 dir = Direction.LEFT;
         }else {
-            if (sumYDiff >= 0)
+            if(sumYDiff >=0 && sumXDiff < 0)
                 dir = Direction.DOWN;
             else
                 dir = Direction.UP;
@@ -131,17 +148,31 @@ public class Gesture {
             return;
         }
         int fingerCount = findNumFingers();
-        Log.v(TAG, "finger count " + fingers);
+        Log.v(TAG, "finger count " + numFingers);
 
-        if (queue.size() > long_threshold)
+        if (queue.size() > long_threshold) {
             Log.v(TAG, "long press, queue size " + queue.size());
+            longPress = true;
+        }
 
         //detect direction
         findDirection(fingerCount);
         Log.v(TAG, "direction " + dir);
 
-        handler.gestureDetected();
+        if(isLongPress() || !NumFingers.ONE.equals(getNumFingers()))
+            handler.gestureDetected();
         queue.clear();
     }
 
+    public Direction getDir(){
+        return dir;
+    }
+
+    public NumFingers getNumFingers(){
+        return numFingers;
+    }
+
+    public boolean isLongPress(){
+        return longPress;
+    }
 }
