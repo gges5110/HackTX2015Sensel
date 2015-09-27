@@ -261,13 +261,15 @@ public class BluetoothChatFragment extends Fragment {
 //                       Log.v(TAG, senselMsg);
                         if(!"****".equals(senselMsg)) {
                             SenselInput current_input = new SenselInput(senselMsg);
-                            if(prev_input != null && prev_input.getDistance(current_input) > 20){
-                                prev_input.setEvent(SenselInput.Event.END);
-                                canvasView.onSenselEvent(prev_input);
-                            }
+                            if(current_input.isValid()) {
+                                if (prev_input != null && prev_input.getDistance(current_input) > 20) {
+                                    prev_input.setEvent(SenselInput.Event.END);
+                                    canvasView.onSenselEvent(prev_input);
+                                }
 
-                            canvasView.onSenselEvent(current_input);
-                            prev_input = current_input;
+                                canvasView.onSenselEvent(current_input);
+                                prev_input = current_input;
+                            }
                         }
                     }
 
