@@ -47,7 +47,7 @@ def openSensorReadContacts(sensel_device, bt):
 
     #Enable contact sending
     sensel_device.setFrameContentControl(sensel.SENSEL_FRAME_CONTACTS_FLAG)
-  
+
     #Enable scanning
     sensel_device.startScanning()
 
