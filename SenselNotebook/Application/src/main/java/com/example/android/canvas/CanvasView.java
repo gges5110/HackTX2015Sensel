@@ -13,6 +13,7 @@ import android.view.View;
 
 import com.example.android.bluetoothchat.SenselInput;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -46,6 +47,12 @@ public class CanvasView extends View {
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeJoin(Paint.Join.ROUND);
         mPaint.setStrokeWidth(4f);
+        color_list = new ArrayList<>();
+        color_list.add(Color.BLACK);
+        color_list.add(Color.RED);
+        color_list.add(Color.BLUE);
+        color_list.add(Color.GREEN);
+        color_index = 0;
     }
 
     @Override
@@ -95,6 +102,14 @@ public class CanvasView extends View {
         }
     }
 
+    private ArrayList<Integer> color_list;
+    private int color_index = 0;
+
+    public void changeColor() {
+        color_index++;
+        mPaint.setColor(color_list.get(color_index % color_list.size()));
+    }
+
     public void clearCanvas() {
         mPath.reset();
         invalidate();
@@ -106,6 +121,11 @@ public class CanvasView extends View {
     }
 
     public boolean onSenselEvent(SenselInput event) {
+        if(event.getForce() < 500 && !SenselInput.Event.END.equals(event.getEvent()) )
+            return false;
+        if(event.getContactID() > 0)
+            return false;
+
 
         float x = event.getY()*width/120;
         float y = height - event.getX()*height/230;

@@ -5,6 +5,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 
 /**
  * Created by Gerry on 2015/9/27.
@@ -98,10 +99,15 @@ public class Gesture {
             first = queue.removeFirst();
         } while (first.size() != numFingers);
 
-        do {
-            //TODO could crash when no more element is left
-            last = queue.removeLast();
-        } while (last.size() != numFingers);
+        try {
+            do {
+                //TODO could crash when no more element is left
+                last = queue.removeLast();
+            } while (last.size() != numFingers);
+        }catch(NoSuchElementException e){
+            dir = Direction.INVALID;
+            return;
+        }
 
         // hopefully the contactIDs from "first" and "last" are the same...
         double sumXDiff = 0, sumYDiff = 0;
@@ -159,8 +165,8 @@ public class Gesture {
         findDirection(fingerCount);
         Log.v(TAG, "direction " + dir);
 
-        if(isLongPress() || !NumFingers.ONE.equals(getNumFingers()))
-            handler.gestureDetected();
+        if(!NumFingers.ONE.equals(getNumFingers()))
+            handler.gestureDetected(isLongPress(), dir, numFingers);
         queue.clear();
     }
 
