@@ -170,6 +170,10 @@ public class Gesture {
         queue.clear();
     }
 
+    public int numContacts() {
+        return findNumFingers();
+    }
+
     public Direction getDir(){
         return dir;
     }

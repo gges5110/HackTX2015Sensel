@@ -267,7 +267,7 @@ public class BluetoothChatFragment extends Fragment {
                             valid_inputs.add(new_input);
                     }
 
-                    if(valid_inputs.size() == 1){
+                    if(gesture.numContacts() == 1){
                         SenselInput current_input = valid_inputs.get(0);
                         if(current_input.isValid()) {
                             if (prev_input != null && prev_input.getDistance(current_input) > 20) {
