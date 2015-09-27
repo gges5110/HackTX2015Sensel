@@ -32,9 +32,11 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -46,29 +48,17 @@ import com.example.android.canvas.CanvasView;
 public class BluetoothChatFragment extends Fragment {
 
     private static final String TAG = "BluetoothChatFragment";
+    private Button clear_button = null;
 
     // Intent request codes
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
     private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
     private static final int REQUEST_ENABLE_BT = 3;
 
-    // Layout Views
-    private ListView mConversationView;
-
     /**
      * Name of the connected device
      */
     private String mConnectedDeviceName = null;
-
-    /**
-     * Array adapter for the conversation thread
-     */
-    private ArrayAdapter<String> mConversationArrayAdapter;
-
-    /**
-     * String buffer for outgoing messages
-     */
-    private StringBuffer mOutStringBuffer;
 
     /**
      * Local Bluetooth adapter
@@ -81,6 +71,8 @@ public class BluetoothChatFragment extends Fragment {
     private BluetoothChatService mChatService = null;
 
     private CanvasView canvasView = null;
+
+    private Gesture gesture = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -95,6 +87,9 @@ public class BluetoothChatFragment extends Fragment {
             Toast.makeText(activity, "Bluetooth is not available", Toast.LENGTH_LONG).show();
             activity.finish();
         }
+
+//        gesture = new Gesture(gestureHandler);
+            gesture = new Gesture(this);
     }
 
 
@@ -144,9 +139,7 @@ public class BluetoothChatFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        mConversationView = (ListView) view.findViewById(R.id.in);
         canvasView = (CanvasView) view.findViewById(R.id.canvasView);
-
     }
 
     /**
@@ -155,16 +148,17 @@ public class BluetoothChatFragment extends Fragment {
     private void setupChat() {
         Log.d(TAG, "setupChat()");
 
-        // Initialize the array adapter for the conversation thread
-        mConversationArrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.message);
-
-        mConversationView.setAdapter(mConversationArrayAdapter);
-
         // Initialize the BluetoothChatService to perform bluetooth connections
         mChatService = new BluetoothChatService(getActivity(), mHandler);
-
-        // Initialize the buffer for outgoing messages
-        mOutStringBuffer = new StringBuffer("");
+        if(getView() != null) {
+            clear_button = (Button) getView().findViewById(R.id.clear_button);
+            clear_button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    canvasView.clearCanvas();
+                }
+            });
+        }
     }
 
     /**
@@ -214,6 +208,20 @@ public class BluetoothChatFragment extends Fragment {
         actionBar.setSubtitle(subTitle);
     }
 
+//    private final Handler gestureHandler = new Handler(){
+//        @Override
+//        public void handleMessage(Message msg) {
+//
+//        }
+//    };
+
+    public void gestureDetected(Boolean isLongPress, Gesture.Direction dir, Gesture.NumFingers numFingers){
+        Log.v(TAG, isLongPress +" " + dir +" "+ numFingers);
+        canvasView.changeColor();
+    }
+
+
+
     /**
      * The Handler that gets information back from the BluetoothChatService
      */
@@ -226,7 +234,6 @@ public class BluetoothChatFragment extends Fragment {
                     switch (msg.arg1) {
                         case BluetoothChatService.STATE_CONNECTED:
                             setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
-                            mConversationArrayAdapter.clear();
                             break;
                         case BluetoothChatService.STATE_CONNECTING:
                             setStatus(R.string.title_connecting);
@@ -238,24 +245,21 @@ public class BluetoothChatFragment extends Fragment {
                     }
                     break;
                 case Constants.MESSAGE_WRITE:
-                    byte[] writeBuf = (byte[]) msg.obj;
-                    // construct a string from the buffer
-                    String writeMessage = new String(writeBuf);
-                    mConversationArrayAdapter.add("Me:  " + writeMessage);
                     break;
                 case Constants.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
-                    Log.v(TAG, readMessage);
+
+                   // gesture.add(readMessage);
                     String[] msgSplit = readMessage.split("\n");
                     for(String senselMsg : msgSplit ) {
-                        mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + senselMsg);
-                        canvasView.onSenselEvent(new SenselInput(senselMsg));
+                        //detect
+                       gesture.add(senselMsg);
+//                       Log.v(TAG, senselMsg);
+                        if(!"****".equals(senselMsg))
+                            canvasView.onSenselEvent(new SenselInput(senselMsg));
                     }
-
-
-
 
                     break;
                 case Constants.MESSAGE_DEVICE_NAME:
