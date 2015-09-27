@@ -123,13 +123,14 @@ public class CanvasView extends View {
             }
         }
         canvas.drawPath(drawPath, drawPaint);
-
     }
 
 
     public boolean onSenselEvent(SenselInput event) {
         if(event.getForce() < 500 && !SenselInput.Event.END.equals(event.getEvent()) )
             return false;
+
+        Log.v(TAG, "event x = " + event.getX() + ", event y = " + event.getY());
 
         float x = event.getY()*width/120;
         float y = height - event.getX() * height / 230;
@@ -151,7 +152,6 @@ public class CanvasView extends View {
         else {
             return false;
         }
-        invalidate();
         return true;
     }
 
@@ -163,7 +163,6 @@ public class CanvasView extends View {
         drawCanvas.drawPath(drawPath, drawPaint);
         mX = x;
         mY = y;
-
     }
 
     private void touch_move(float x, float y) {
@@ -181,6 +180,7 @@ public class CanvasView extends View {
 
     private void touch_up() {
         if (drawPoint == true) {
+            Log.v("AAAAAAAAAAA", "touch up draw point");
             drawCanvas.drawPoint(mX, mY, drawPaint);
             Point p = new Point();
             p.set((int) mX, (int) mY);
@@ -189,6 +189,7 @@ public class CanvasView extends View {
             marker.add(0);
 
         } else {
+            Log.v("AAAAAAAAAAA", "touch up draw line");
             drawPath.lineTo(mX, mY);
             drawCanvas.drawPath(drawPath, drawPaint);
             paths.add(drawPath);
@@ -196,7 +197,6 @@ public class CanvasView extends View {
             drawPath.reset();
             pathscolor.add(drawPaint.getColor());
             marker.add(1);
-
         }
     }
 
@@ -208,7 +208,6 @@ public class CanvasView extends View {
             pointcolor.clear();
             invalidate();
         }
-
     }
 
     public void undo() {
@@ -232,14 +231,4 @@ public class CanvasView extends View {
             }
         }
     }
-
-
-
-
-
-
-    ////////////////////////////////////////////
-
-
-
 }
