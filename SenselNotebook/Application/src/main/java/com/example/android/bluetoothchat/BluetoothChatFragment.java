@@ -40,6 +40,8 @@ import android.widget.Toast;
 import com.example.android.canvas.CanvasView;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * This fragment controls Bluetooth to communicate with other devices.
@@ -74,6 +76,7 @@ public class BluetoothChatFragment extends Fragment {
     private CanvasView canvasView = null;
 
     private Gesture gesture = null;
+    private Timer timer;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -90,7 +93,8 @@ public class BluetoothChatFragment extends Fragment {
         }
 
 //        gesture = new Gesture(gestureHandler);
-            gesture = new Gesture(this);
+        timer = new Timer();
+        gesture = new Gesture(this);
     }
 
 
@@ -162,6 +166,7 @@ public class BluetoothChatFragment extends Fragment {
         }
     }
 
+
     /**
      * Makes this device discoverable.
      */
@@ -219,16 +224,25 @@ public class BluetoothChatFragment extends Fragment {
     public void gestureDetected(Boolean isLongPress, Gesture.Direction dir, Gesture.NumFingers numFingers){
         Log.v(TAG, isLongPress + " " + dir + " " + numFingers);
 
-        if(Gesture.Direction.UP.equals(dir))
+        if(Gesture.Direction.UP.equals(dir)) {
             canvasView.changeColorUp();
-        else if(Gesture.Direction.DOWN.equals(dir))
+            canvasView.undo();
+        }
+        else if(Gesture.Direction.DOWN.equals(dir)) {
             canvasView.changeColorDown();
+            canvasView.undo();
+        }
 
         if(Gesture.Direction.RIGHT.equals(dir) && Gesture.Direction.LEFT.equals(dir))
             canvasView.undo();
     }
 
-
+    private void setEnd() {
+        if(prev_input != null) {
+            prev_input.setEvent(SenselInput.Event.END);
+            canvasView.onSenselEvent(prev_input);
+        }
+    }
 
     /**
      * The Handler that gets information back from the BluetoothChatService
@@ -269,11 +283,25 @@ public class BluetoothChatFragment extends Fragment {
                         SenselInput new_input = new SenselInput(senselMsg);
                         if(new_input.isValid())
                             valid_inputs.add(new_input);
+
                     }
 
-                    if(gesture.numContacts() == 1){
+                    if(valid_inputs.size() == 1 && gesture.numContacts() == 1){
                         SenselInput current_input = valid_inputs.get(0);
                         if(current_input.isValid()) {
+                            if(SenselInput.Event.START.equals(current_input.getEvent()) ||  SenselInput.Event.MOVE.equals(current_input.getEvent()) ) {
+                                timer.cancel();
+                                timer = new Timer();
+                                timer.schedule(new TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        setEnd();
+                                    }
+                                }, 100);
+                            }
+                            else if (SenselInput.Event.END.equals(current_input.getEvent())) {
+                                timer.cancel();
+                            }
                             if (prev_input != null && prev_input.getDistance(current_input) > 20) {
                                 prev_input.setEvent(SenselInput.Event.END);
                                 canvasView.onSenselEvent(prev_input);

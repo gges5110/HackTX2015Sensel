@@ -87,7 +87,10 @@ public class CanvasView extends View {
 
     public void changeColorDown() {
         Log.v(TAG, "change color");
-        color_index--;
+        if(color_index == 0)
+            color_index = color_list.size();
+        else
+            color_index--;
         drawPaint.setColor(color_list.get(color_index % color_list.size()));
     }
 
