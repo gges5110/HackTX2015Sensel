@@ -91,12 +91,22 @@ public class CanvasView extends View {
     private int color_index = 0;
 
     public void changeColorUp() {
+//        Toast.makeText(context,
+//                "Color Changed", Toast.LENGTH_LONG)
+//                .show();
         Log.v(TAG, "change color");
         color_index++;
         drawPaint.setColor(color_list.get(color_index % color_list.size()));
     }
 
+    public int getPaintColor() {
+        return color_list.get(color_index % color_list.size());
+    }
+
     public void changeColorDown() {
+//        Toast.makeText(context,
+//                "Color Changed", Toast.LENGTH_LONG)
+//                .show();
         Log.v(TAG, "change color");
         if(color_index == 0)
             color_index = color_list.size();
@@ -155,23 +165,21 @@ public class CanvasView extends View {
         float x = event.getY()*width/120;
         float y = height - event.getX() * height / 230;
         Log.v(TAG, "x = " + x + ", y = " + y);
-        drawPaint.setStrokeWidth(event.getForce()/1000);
+//        drawPaint.setStrokeWidth(event.getForce()/1000);
 
         if(SenselInput.Event.START.equals(event.getEvent())) {
             touch_start(x, y);
-            invalidate();
         }
         else if (SenselInput.Event.MOVE.equals(event.getEvent())) {
             touch_move(x, y);
-            invalidate();
         }
         else if (SenselInput.Event.END.equals(event.getEvent())) {
             touch_up();
-            invalidate();
         }
         else {
             return false;
         }
+        invalidate();
         return true;
     }
 
@@ -238,6 +246,7 @@ public class CanvasView extends View {
     }
 
     public void clearCanvas() {
+
         if (marker.size() > 0) {
             paths.clear();
             points.clear();

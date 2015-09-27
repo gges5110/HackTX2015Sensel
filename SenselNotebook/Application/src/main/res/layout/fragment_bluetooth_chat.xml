@@ -23,35 +23,52 @@
         android:id="@+id/canvasView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Clear"
-        android:id="@+id/clear_button"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginLeft="44dp"
-        android:layout_marginStart="44dp"
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height= "wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Save"
-        android:id="@+id/save_button"
-        android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@+id/clear_button"
-        android:layout_toEndOf="@+id/clear_button" />
+        <ImageView
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:id="@+id/paintcolorIM"
+            android:background="#000000"
+            android:layout_gravity="center"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="10dp" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Drawing Mode"
-        android:id="@+id/mode_button"
-        android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@+id/save_button"
-        android:layout_toEndOf="@+id/save_button" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Clear"
+            android:id="@+id/clear_button"
+
+
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save"
+            android:id="@+id/save_button"
+            android:layout_alignParentBottom="true"
+            android:layout_toRightOf="@+id/clear_button"
+            android:layout_toEndOf="@+id/clear_button" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Drawing Mode"
+            android:id="@+id/mode_button"
+            android:layout_alignParentBottom="true"
+            android:layout_toRightOf="@+id/save_button"
+            android:layout_toEndOf="@+id/save_button"
+            android:layout_gravity="center" />
+        </LinearLayout>>
+
 
 </RelativeLayout>

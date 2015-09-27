@@ -35,6 +35,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.android.canvas.CanvasView;
@@ -50,6 +51,7 @@ public class BluetoothChatFragment extends Fragment {
 
     private static final String TAG = "BluetoothChatFragment";
     private Button clear_button, save_button, mode_button;
+    private ImageView paintcolorIM;
 
     // Intent request codes
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
@@ -175,7 +177,7 @@ public class BluetoothChatFragment extends Fragment {
                     canvasView.save();
                 }
             });
-
+            paintcolorIM = (ImageView) getView().findViewById(R.id.paintcolorIM);
             mode_button = (Button) getView().findViewById(R.id.mode_button);
             mode_button.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -253,15 +255,17 @@ public class BluetoothChatFragment extends Fragment {
         if(Gesture.Direction.UP.equals(dir) && Gesture.NumFingers.THREE.equals(numFingers)) {
             canvasView.changeColorUp();
             canvasView.undo();
+            paintcolorIM.setBackgroundColor(canvasView.getPaintColor());
             Toast.makeText(getActivity(),
-                    "Color change up", Toast.LENGTH_LONG)
+                    "Color change up", Toast.LENGTH_SHORT)
                     .show();
         }
         else if(Gesture.Direction.DOWN.equals(dir) && Gesture.NumFingers.THREE.equals(numFingers)) {
             canvasView.changeColorDown();
             canvasView.undo();
+            paintcolorIM.setBackgroundColor(canvasView.getPaintColor());
             Toast.makeText(getActivity(),
-                    "Color change down", Toast.LENGTH_LONG)
+                    "Color change down", Toast.LENGTH_SHORT)
                     .show();
         }
 
@@ -326,6 +330,7 @@ public class BluetoothChatFragment extends Fragment {
                             if(SenselInput.Event.START.equals(current_input.getEvent()) ||  SenselInput.Event.MOVE.equals(current_input.getEvent()) ) {
                                 timer.cancel();
                                 timer = new Timer();
+
                                 timer.schedule(new TimerTask() {
                                     @Override
                                     public void run() {

@@ -14,6 +14,10 @@ public class SenselInput {
 
 	public enum Event {START, MOVE, END, INVALID}
 
+	public SenselInput(SenselInput senselInput) {
+
+	}
+
 	public SenselInput(String s){
 		String[] attr = s.split(", ");
 		try{
