@@ -49,7 +49,7 @@ import java.util.TimerTask;
 public class BluetoothChatFragment extends Fragment {
 
     private static final String TAG = "BluetoothChatFragment";
-    private Button clear_button, save_button;
+    private Button clear_button, save_button, mode_button;
 
     // Intent request codes
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
@@ -176,6 +176,18 @@ public class BluetoothChatFragment extends Fragment {
                 }
             });
 
+            mode_button = (Button) getView().findViewById(R.id.mode_button);
+            mode_button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    gestureMode = !gestureMode;
+                    if(gestureMode)
+                        mode_button.setText("Gesture Mode");
+                    else
+                        mode_button.setText("Drawing Mode");
+                }
+            });
+
 
         }
     }
@@ -241,21 +253,16 @@ public class BluetoothChatFragment extends Fragment {
         if(Gesture.Direction.UP.equals(dir) && Gesture.NumFingers.THREE.equals(numFingers)) {
             canvasView.changeColorUp();
             canvasView.undo();
+            Toast.makeText(getActivity(),
+                    "Color change up", Toast.LENGTH_LONG)
+                    .show();
         }
         else if(Gesture.Direction.DOWN.equals(dir) && Gesture.NumFingers.THREE.equals(numFingers)) {
             canvasView.changeColorDown();
             canvasView.undo();
-        }
-        else if(isLongPress && Gesture.NumFingers.TWO.equals(numFingers)){
-            gestureMode = !gestureMode;
-            if(gestureMode)
-                Toast.makeText(getActivity(),
-                        "Gesture Mode", Toast.LENGTH_LONG)
-                        .show();
-            else
-                Toast.makeText(getActivity(),
-                        "Drawing/Writing Mode", Toast.LENGTH_LONG)
-                        .show();
+            Toast.makeText(getActivity(),
+                    "Color change down", Toast.LENGTH_LONG)
+                    .show();
         }
 
         if(Gesture.Direction.RIGHT.equals(dir) && Gesture.Direction.LEFT.equals(dir))
@@ -313,7 +320,7 @@ public class BluetoothChatFragment extends Fragment {
 
                     }
 
-                    if(!gestureMode){
+                    if(!gestureMode && valid_inputs.size() == 1){
                         SenselInput current_input = valid_inputs.get(0);
                         if(current_input.isValid()) {
                             if(SenselInput.Event.START.equals(current_input.getEvent()) ||  SenselInput.Event.MOVE.equals(current_input.getEvent()) ) {
