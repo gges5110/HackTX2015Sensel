@@ -78,6 +78,8 @@ public class BluetoothChatFragment extends Fragment {
     private Gesture gesture = null;
     private Timer timer;
 
+    private boolean gestureMode;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,6 +97,8 @@ public class BluetoothChatFragment extends Fragment {
 //        gesture = new Gesture(gestureHandler);
         timer = new Timer();
         gesture = new Gesture(this);
+
+        gestureMode=false;
     }
 
 
@@ -234,13 +238,24 @@ public class BluetoothChatFragment extends Fragment {
     public void gestureDetected(Boolean isLongPress, Gesture.Direction dir, Gesture.NumFingers numFingers){
         Log.v(TAG, isLongPress + " " + dir + " " + numFingers);
 
-        if(Gesture.Direction.UP.equals(dir)) {
+        if(Gesture.Direction.UP.equals(dir) && Gesture.NumFingers.THREE.equals(numFingers)) {
             canvasView.changeColorUp();
             canvasView.undo();
         }
-        else if(Gesture.Direction.DOWN.equals(dir)) {
+        else if(Gesture.Direction.DOWN.equals(dir) && Gesture.NumFingers.THREE.equals(numFingers)) {
             canvasView.changeColorDown();
             canvasView.undo();
+        }
+        else if(isLongPress && Gesture.NumFingers.TWO.equals(numFingers)){
+            gestureMode = !gestureMode;
+            if(gestureMode)
+                Toast.makeText(getActivity(),
+                        "Gesture Mode", Toast.LENGTH_LONG)
+                        .show();
+            else
+                Toast.makeText(getActivity(),
+                        "Drawing/Writing Mode", Toast.LENGTH_LONG)
+                        .show();
         }
 
         if(Gesture.Direction.RIGHT.equals(dir) && Gesture.Direction.LEFT.equals(dir))
@@ -298,7 +313,7 @@ public class BluetoothChatFragment extends Fragment {
 
                     }
 
-                    if(valid_inputs.size() == 1 && gesture.numContacts() == 1){
+                    if(!gestureMode){
                         SenselInput current_input = valid_inputs.get(0);
                         if(current_input.isValid()) {
                             if(SenselInput.Event.START.equals(current_input.getEvent()) ||  SenselInput.Event.MOVE.equals(current_input.getEvent()) ) {

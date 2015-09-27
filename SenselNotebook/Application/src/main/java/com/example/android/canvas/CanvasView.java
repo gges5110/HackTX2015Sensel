@@ -52,6 +52,8 @@ public class CanvasView extends View {
     public int height;
     private static final String TAG = "CanvasView";
 
+    private int fileNumber;
+
     private float mX, mY;
     private final float TOUCH_TOLERANCE = 1;
 
@@ -61,6 +63,8 @@ public class CanvasView extends View {
         setupDrawing();
         setDrawingCacheEnabled(true);
         // TODO Auto-generated constructor stub
+
+        fileNumber=0;
     }
 
     private void setupDrawing() {
@@ -173,13 +177,14 @@ public class CanvasView extends View {
 
     public void save()  {
         try {
-            File save = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "arun.jpg");
+            File save = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), fileNumber + ".jpg");
             FileOutputStream fos = new FileOutputStream(save);
             setBackgroundColor(Color.WHITE);
             getDrawingCache().compress(
                     Bitmap.CompressFormat.JPEG, 100, fos);
             fos.flush();
             fos.close();
+            fileNumber++;
             Log.v(TAG, "file saved at " + save.getPath());
             Toast.makeText(context,
                     "Succesfully saved", Toast.LENGTH_LONG)
