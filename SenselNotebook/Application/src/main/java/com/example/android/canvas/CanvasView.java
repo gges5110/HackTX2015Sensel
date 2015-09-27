@@ -111,6 +111,7 @@ public class CanvasView extends View {
         float y = height - event.getX()*height/230;
         Log.v(TAG, "x = " + x + ", y = " + y);
         mPaint.setStrokeWidth(event.getForce()/1000) ;
+
         if(SenselInput.Event.START.equals(event.getEvent())) {
             startTouch(x, y);
             invalidate();
