@@ -42,6 +42,8 @@ import android.widget.Toast;
 
 import com.example.android.canvas.CanvasView;
 
+import java.util.ArrayList;
+
 /**
  * This fragment controls Bluetooth to communicate with other devices.
  */
@@ -255,21 +257,26 @@ public class BluetoothChatFragment extends Fragment {
 
                    // gesture.add(readMessage);
                     String[] msgSplit = readMessage.split("\n");
+                    ArrayList<SenselInput> valid_inputs = new ArrayList<>();
+
                     for(String senselMsg : msgSplit ) {
                         //detect
-                       gesture.add(senselMsg);
-//                       Log.v(TAG, senselMsg);
-                        if(!"****".equals(senselMsg)) {
-                            SenselInput current_input = new SenselInput(senselMsg);
-                            if(current_input.isValid()) {
-                                if (prev_input != null && prev_input.getDistance(current_input) > 20) {
-                                    prev_input.setEvent(SenselInput.Event.END);
-                                    canvasView.onSenselEvent(prev_input);
-                                }
+                        gesture.add(senselMsg);
+                        SenselInput new_input = new SenselInput(senselMsg);
+                        if(new_input.isValid())
+                            valid_inputs.add(new_input);
+                    }
 
-                                canvasView.onSenselEvent(current_input);
-                                prev_input = current_input;
+                    if(valid_inputs.size() == 1){
+                        SenselInput current_input = valid_inputs.get(0);
+                        if(current_input.isValid()) {
+                            if (prev_input != null && prev_input.getDistance(current_input) > 20) {
+                                prev_input.setEvent(SenselInput.Event.END);
+                                canvasView.onSenselEvent(prev_input);
                             }
+
+                            canvasView.onSenselEvent(current_input);
+                            prev_input = current_input;
                         }
                     }
 
